@@ -552,12 +552,16 @@
   }
 
   function startTimer(sec) {
-    timerEndTime = Date.now() + sec * 1000;
-    timerPausedLeft = null;
-    isTimerRunning = true;
-    try { localStorage.setItem(TIMER_KEY, String(timerEndTime)); } catch (e) {}
-    requestWakeLock();
-    runTimerLoop();
+    clearInterval(timerId);
+    timerEndTime = null;
+    timerPausedLeft = sec * 1000;
+    isTimerRunning = false;
+    try { localStorage.removeItem(TIMER_KEY); } catch (e) {}
+    releaseWakeLock();
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    document.getElementById('btnPlayPause').textContent = '▶';
   }
 
   function toggleTimer() {
