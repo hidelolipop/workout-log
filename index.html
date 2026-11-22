@@ -30,8 +30,6 @@
       color: var(--text);
       max-width: 480px;
     }
-
-    /* トップ記録ボタン */
     .btn-submit {
       width: 100%; padding: 14px; border: none; border-radius: 8px;
       background: var(--accent); color: #ffffff; font-size: 16px; font-weight: 700;
@@ -40,8 +38,6 @@
     }
     .btn-submit:active { background: var(--accent-hover); }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* タイマーセクション */
     .timer-container {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 16px; gap: 8px;
@@ -64,46 +60,27 @@
       font-size: 14px; display: inline-flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-
-    /* 横スクロール対応テーブル（1〜5セット表示、6〜10セットへスワイプ可能） */
     .table-scroll-wrap {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      margin-bottom: 12px; border: 1px solid var(--border); border-radius: 6px;
     }
     .table-workout {
-      width: max-content;
-      min-width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      text-align: center;
+      width: max-content; min-width: 100%; border-collapse: collapse;
+      font-size: 14px; text-align: center;
     }
     .table-workout th, .table-workout td {
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 0;
-      height: 44px;
-      width: 56px;
-      min-width: 56px;
-      vertical-align: middle;
+      border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 0; height: 44px; width: 56px; min-width: 56px; vertical-align: middle;
     }
     .table-workout tr:last-child td { border-bottom: none; }
     .table-workout th:last-child, .table-workout td:last-child { border-right: none; }
     .table-workout th {
       background: var(--light-gray); font-weight: 600; color: var(--text); height: 34px;
     }
-    .table-workout th.sticky-col,
-    .table-workout td.sticky-col {
-      position: sticky; left: 0; z-index: 2;
-      background: var(--light-gray);
-      font-weight: 700;
-      width: 68px; min-width: 68px;
-      border-right: 1.5px solid var(--border);
+    .table-workout th.sticky-col, .table-workout td.sticky-col {
+      position: sticky; left: 0; z-index: 2; background: var(--light-gray);
+      font-weight: 700; width: 68px; min-width: 68px; border-right: 1.5px solid var(--border);
     }
-
     .table-workout input[type="number"] {
       width: 100%; height: 100%; border: none; outline: none;
       text-align: center; font-size: 16px; font-weight: 700; color: var(--text);
@@ -114,28 +91,16 @@
     }
     .table-workout input::-webkit-outer-spin-button,
     .table-workout input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-    /* 有酸素運動用テーブル */
     .table-cardio {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 12px;
-      font-size: 14px;
-      text-align: center;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow: hidden;
+      width: 100%; border-collapse: collapse; margin-bottom: 12px;
+      font-size: 14px; text-align: center; border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden;
     }
     .table-cardio th, .table-cardio td {
-      border: 1px solid var(--border);
-      width: 33.33%;
-      vertical-align: middle;
+      border: 1px solid var(--border); width: 33.33%; vertical-align: middle;
     }
     .table-cardio th {
-      background: var(--light-gray);
-      font-weight: 700;
-      padding: 8px 4px;
-      font-size: 13px;
+      background: var(--light-gray); font-weight: 700; padding: 8px 4px; font-size: 13px;
     }
     .table-cardio td { height: 48px; }
     .table-cardio input[type="number"] {
@@ -144,45 +109,28 @@
       background: transparent;
     }
     .table-cardio input::placeholder { color: #cbd5e1; font-weight: 400; font-size: 14px; }
-
-    /* メモ・セレクト・自由入力 */
     .input-memo, .select-exercise, .input-custom {
       width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 6px;
       font-size: 16px; color: var(--text); outline: none; background: #ffffff;
     }
     .input-memo { margin-bottom: 20px; }
     .input-memo::placeholder { color: #94a3b8; font-size: 15px; }
-
-    .section-title {
-      font-size: 14px; font-weight: 700; color: var(--text); margin: 0 0 8px 0;
-    }
-
-    /* 部位フィルターグリッド */
-    .cat-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-      margin-bottom: 20px;
-    }
+    .section-title { font-size: 14px; font-weight: 700; color: var(--text); margin: 0 0 8px 0; }
+    .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 20px; }
     .cat-btn {
       border: 1px solid var(--border); background: var(--active-blue);
       color: var(--text); padding: 10px 4px; border-radius: 6px;
       font-size: 13px; font-weight: 700; text-align: center; cursor: pointer;
     }
-    .cat-btn.active {
-      background: var(--primary); border-color: var(--primary); color: #ffffff;
-    }
-
+    .cat-btn.active { background: var(--primary); border-color: var(--primary); color: #ffffff; }
     .select-exercise {
       font-weight: 700; margin-bottom: 10px; appearance: none;
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
       background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
       padding-right: 40px;
     }
-    .input-custom {
-      background: var(--active-blue); border-color: #dbeafe; margin-bottom: 10px;
-    }
+    .input-custom { background: var(--active-blue); border-color: #dbeafe; margin-bottom: 10px; }
     .input-custom::placeholder { color: #94a3b8; font-size: 15px; }
-
-    /* 定番リスト追加ボックス */
     .add-menu-box {
       display: none; background: var(--active-blue); border: 1.5px solid #bfdbfe;
       border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;
@@ -201,22 +149,13 @@
       margin: 0; padding: 6px 10px; font-size: 16px; border-radius: 6px;
       border: 1px solid var(--border); flex: 1; background: #ffffff;
     }
-
     hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 20px; }
-
-    /* 過去3回履歴カード */
     .history-card { margin-bottom: 18px; }
-    .history-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
-    }
+    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
     .history-date { font-size: 13px; font-weight: 700; color: var(--text); }
-    .btn-copy {
-      background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center;
-    }
+    .btn-copy { background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center; }
     .btn-copy svg { width: 18px; height: 18px; stroke: var(--muted); }
     .history-card .table-workout td { font-size: 14px; font-weight: 600; }
-
-    /* グラフ・履歴タブ用カード */
     .card-box {
       background: #ffffff; border: 1.5px solid var(--border);
       padding: 14px; border-radius: 10px; margin-bottom: 14px;
@@ -230,8 +169,6 @@
       border: 1.5px solid #fecaca; background: #fef2f2; color: var(--danger);
       padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; flex-shrink: 0;
     }
-
-    /* 下部フッタータブバー */
     .tab-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
       background: #ffffff; border-top: 1.5px solid var(--border);
@@ -248,11 +185,9 @@
 </head>
 <body>
 
-  <!-- 記録・タイマータブ -->
   <div id="view-record">
     <button class="btn-submit" id="saveBtn" onclick="submitData()">シート＆カレンダーに記録</button>
 
-    <!-- タイマー -->
     <div class="timer-container">
       <div class="timer-left">
         <span class="timer-icon">⏱️</span>
@@ -265,7 +200,6 @@
       </div>
     </div>
 
-    <!-- 筋トレ用テーブル（10セット横スクロール） -->
     <div class="table-scroll-wrap" id="strengthTableWrap">
       <table class="table-workout">
         <thead>
@@ -306,7 +240,6 @@
       </table>
     </div>
 
-    <!-- 有酸素運動用テーブル（時間・距離・カロリー） -->
     <table class="table-cardio hidden" id="cardioTableWrap">
       <thead>
         <tr>
@@ -324,10 +257,8 @@
       </tbody>
     </table>
 
-    <!-- メモ入力 -->
     <input type="text" class="input-memo" id="memoInput" placeholder="メモ：その時の気づきなど" oninput="saveDraft()">
 
-    <!-- 部位フィルター -->
     <h3 class="section-title">部位で絞り込み</h3>
     <div class="cat-grid" id="catTabs">
       <button class="cat-btn active" onclick="setCat('すべて')">すべて</button>
@@ -340,7 +271,6 @@
       <button class="cat-btn" onclick="setCat('通勤徒歩')">通勤徒歩</button>
     </div>
 
-    <!-- 種目選択 -->
     <h3 class="section-title">種目を選択</h3>
     <select class="select-exercise" id="exerciseSelect" onchange="onExerciseChange()"></select>
     <input type="text" class="input-custom" id="customExercise" oninput="onCustomInput()" placeholder="自由入力（新しい種目はここに入力）">
@@ -366,12 +296,10 @@
 
     <hr>
 
-    <!-- 過去3回分の記録 -->
     <h3 class="section-title">過去3回分の記録</h3>
     <div id="recentHistoryList">読み込み中...</div>
   </div>
 
-  <!-- 推移グラフ・履歴タブ -->
   <div id="view-graph" class="hidden">
     <div class="card-box">
       <h3 class="section-title">グラフ表示する種目</h3>
@@ -384,7 +312,6 @@
     </div>
   </div>
 
-  <!-- 下部フッタータブバー -->
   <div class="tab-bar">
     <button class="tab-item active" id="tab-record" onclick="switchTab('record')">
       <span class="tab-icon">✍️</span>記録・タイマー
@@ -395,7 +322,6 @@
   </div>
 
 <script>
-  // ★ここにGASで発行したウェブアプリのURLを貼り付けてください★
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZPS7yH82qHLqIVWg9MWXxa8ScPpbngb-Cw5wafd1VFw2ziTtdyZ7d03reObQ46C5j4Q/exec';
 
   const MAX_SETS = 10;
@@ -429,8 +355,8 @@
     { cat: '通勤徒歩', name: '通勤徒歩（帰り）', isCardio: true }
   ];
 
-  const DRAFT_KEY = 'workout_draft_gh_v1';
-  const TIMER_KEY = 'workout_timer_end_gh_v1';
+  const DRAFT_KEY = 'workout_draft_gh_v2';
+  const TIMER_KEY = 'workout_timer_end_gh_v2';
 
   let menus = [...defaultMenus];
   let currentCat = 'すべて';
@@ -445,12 +371,19 @@
   let isTimerRunning = false;
   let wakeLock = null;
 
-  async function postToGas(payload) {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    return await res.json();
+  // GETパラメータ経由でGASと通信（CORSブロックを完全回避）
+  async function callGas(action, payloadObj) {
+    const url = new URL(GAS_URL);
+    url.searchParams.set('action', action);
+    if (payloadObj !== undefined) {
+      url.searchParams.set('payload', JSON.stringify(payloadObj));
+    }
+    const res = await fetch(url.toString());
+    const data = await res.json();
+    if (data && data.status === 'error') {
+      throw new Error(data.message || 'GAS側でエラーが発生しました');
+    }
+    return data;
   }
 
   function isCardioMode() {
@@ -693,7 +626,6 @@
     }
   });
 
-  // データ送信
   async function submitData() {
     const btn = document.getElementById('saveBtn');
     const custom = document.getElementById('customExercise').value.trim();
@@ -785,11 +717,11 @@
     btn.textContent = '⏳ 保存中...';
 
     try {
-      await postToGas({ action: 'saveWorkout', data: payload });
+      await callGas('saveWorkout', payload);
 
       if (shouldAddMenu && newMenuItem) {
         menus.push(newMenuItem);
-        await postToGas({ action: 'addCustomMenu', item: newMenuItem });
+        await callGas('addCustomMenu', newMenuItem);
         renderExerciseOptions(true);
         const newIdx = filteredMenus.findIndex(m => m.name === custom);
         if (newIdx >= 0) document.getElementById('exerciseSelect').value = String(newIdx);
@@ -803,18 +735,16 @@
       if (!cardio) startTimer(60);
       await loadInitialData();
     } catch (err) {
-      alert('保存エラー: ' + err);
+      alert('保存エラー: ' + err.message);
     } finally {
       btn.disabled = false;
       btn.textContent = 'シート＆カレンダーに記録';
     }
   }
 
-  // 初期データ（履歴＆追加メニュー）をGASから取得
   async function loadInitialData() {
     try {
-      const res = await fetch(`${GAS_URL}?action=init`);
-      const data = await res.json();
+      const data = await callGas('init');
 
       if (Array.isArray(data.customMenus)) {
         data.customMenus.forEach(item => {
@@ -835,11 +765,11 @@
         renderGraphTab();
       }
     } catch (e) {
-      renderRecentHistory();
+      document.getElementById('recentHistoryList').innerHTML =
+        `<div style="font-size:13px; color:#dc2626;">通信エラー: ${e.message}</div>`;
     }
   }
 
-  // 選択中種目の「過去3回分の記録」を表示
   function renderRecentHistory() {
     const listEl = document.getElementById('recentHistoryList');
     const idx = Number(document.getElementById('exerciseSelect').value);
@@ -1046,15 +976,14 @@
     }
 
     try {
-      await postToGas({ action: 'deleteWorkout', item: target });
+      await callGas('deleteWorkout', target);
       await loadInitialData();
     } catch (err) {
-      alert('削除エラー: ' + err);
+      alert('削除エラー: ' + err.message);
       await loadInitialData();
     }
   }
 
-  // 初期化
   restoreDraft();
   restoreTimer();
   loadInitialData();
