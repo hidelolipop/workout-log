@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="筋トレログ">
+  <title>筋トレログ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --border: #cbd5e1;
+      --primary: #1e293b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --text: #0f172a;
+      --muted: #64748b;
+      --light-gray: #f8fafc;
+      --active-blue: #eff6ff;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0 auto;
+      padding: 16px 16px 88px;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 480px;
+    }
+
+    /* トップ記録ボタン */
+    .btn-submit {
+      width: 100%; padding: 14px; border: none; border-radius: 8px;
+      background: var(--accent); color: #ffffff; font-size: 16px; font-weight: 700;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+      margin-bottom: 16px; cursor: pointer; text-align: center;
+    }
+    .btn-submit:active { background: var(--accent-hover); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* タイマーセクション */
+    .timer-container {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; gap: 8px;
+    }
+    .timer-left { display: flex; align-items: center; gap: 8px; }
+    .timer-icon { font-size: 28px; line-height: 1; }
+    .timer-disp {
+      font-size: 34px; font-weight: 800; color: var(--primary);
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .timer-btns { display: flex; gap: 6px; align-items: center; }
+    .timer-btns button {
+      border: none; background: var(--primary); color: #ffffff;
+      height: 38px; padding: 0 12px; border-radius: 6px;
+      font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .timer-btns button.btn-play-pause {
+      width: 48px; padding: 0;
+      background: #e2e8f0; color: var(--primary); border: 1px solid var(--border);
+      font-size: 14px; display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* 横スクロール対応テーブル（1〜5セット表示、6〜10セットへスワイプ可能） */
+    .table-scroll-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .table-workout {
+      width: max-content;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: center;
+    }
+    .table-workout th, .table-workout td {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0;
+      height: 44px;
+      width: 56px;
+      min-width: 56px;
+      vertical-align: middle;
+    }
+    .table-workout tr:last-child td { border-bottom: none; }
+    .table-workout th:last-child, .table-workout td:last-child { border-right: none; }
+    .table-workout th {
+      background: var(--light-gray); font-weight: 600; color: var(--text); height: 34px;
+    }
+    .table-workout th.sticky-col,
+    .table-workout td.sticky-col {
+      position: sticky; left: 0; z-index: 2;
+      background: var(--light-gray);
+      font-weight: 700;
+      width: 68px; min-width: 68px;
+      border-right: 1.5px solid var(--border);
+    }
+
+    .table-workout input[type="number"] {
+      width: 100%; height: 100%; border: none; outline: none;
+      text-align: center; font-size: 16px; font-weight: 700; color: var(--text);
+      background: transparent; padding: 0 2px;
+    }
+    .table-workout input[type="number"]::placeholder {
+      color: #cbd5e1; font-weight: 400; font-size: 14px;
+    }
+    .table-workout input::-webkit-outer-spin-button,
+    .table-workout input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* 有酸素運動用テーブル */
+    .table-cardio {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 14px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .table-cardio th, .table-cardio td {
+      border: 1px solid var(--border);
+      width: 33.33%;
+      vertical-align: middle;
+    }
+    .table-cardio th {
+      background: var(--light-gray);
+      font-weight: 700;
+      padding: 8px 4px;
+      font-size: 13px;
+    }
+    .table-cardio td { height: 48px; }
+    .table-cardio input[type="number"] {
+      width: 100%; height: 100%; border: none; outline: none;
+      text-align: center; font-size: 16px; font-weight: 700; color: var(--text);
+      background: transparent;
+    }
+    .table-cardio input::placeholder { color: #cbd5e1; font-weight: 400; font-size: 14px; }
+
+    /* メモ・セレクト・自由入力 */
+    .input-memo, .select-exercise, .input-custom {
+      width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 6px;
+      font-size: 16px; color: var(--text); outline: none; background: #ffffff;
+    }
+    .input-memo { margin-bottom: 20px; }
+    .input-memo::placeholder { color: #94a3b8; font-size: 15px; }
+
+    .section-title {
+      font-size: 14px; font-weight: 700; color: var(--text); margin: 0 0 8px 0;
+    }
+
+    /* 部位フィルターグリッド */
+    .cat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      margin-bottom: 20px;
+    }
+    .cat-btn {
+      border: 1px solid var(--border); background: var(--active-blue);
+      color: var(--text); padding: 10px 4px; border-radius: 6px;
+      font-size: 13px; font-weight: 700; text-align: center; cursor: pointer;
+    }
+    .cat-btn.active {
+      background: var(--primary); border-color: var(--primary); color: #ffffff;
+    }
+
+    .select-exercise {
+      font-weight: 700; margin-bottom: 10px; appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+      padding-right: 40px;
+    }
+    .input-custom {
+      background: var(--active-blue); border-color: #dbeafe; margin-bottom: 10px;
+    }
+    .input-custom::placeholder { color: #94a3b8; font-size: 15px; }
+
+    /* 定番リスト追加ボックス */
+    .add-menu-box {
+      display: none; background: var(--active-blue); border: 1.5px solid #bfdbfe;
+      border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;
+    }
+    .add-menu-box.show { display: block; }
+    .check-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 700; color: var(--primary);
+    }
+    .check-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+    .cat-select-inline {
+      margin-top: 8px; display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; color: var(--muted);
+    }
+    .cat-select-inline select {
+      margin: 0; padding: 6px 10px; font-size: 16px; border-radius: 6px;
+      border: 1px solid var(--border); flex: 1; background: #ffffff;
+    }
+
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 20px; }
+
+    /* 過去3回履歴カード */
+    .history-card { margin-bottom: 18px; }
+    .history-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+    }
+    .history-date { font-size: 13px; font-weight: 700; color: var(--text); }
+    .btn-copy {
+      background: none; border: none; padding: 4px; cursor: pointer; display: flex; align-items: center;
+    }
+    .btn-copy svg { width: 18px; height: 18px; stroke: var(--muted); }
+    .history-card .table-workout td { font-size: 14px; font-weight: 600; }
+
+    /* グラフ・履歴タブ用カード */
+    .card-box {
+      background: #ffffff; border: 1.5px solid var(--border);
+      padding: 14px; border-radius: 10px; margin-bottom: 14px;
+    }
+    .full-history-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      border-bottom: 1px solid #e2e8f0; padding: 10px 0;
+    }
+    .full-history-item:last-child { border-bottom: none; }
+    .del-btn {
+      border: 1.5px solid #fecaca; background: #fef2f2; color: var(--danger);
+      padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* 下部フッタータブバー */
+    .tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+      background: #ffffff; border-top: 1.5px solid var(--border);
+      display: flex; padding: 8px 0 20px;
+    }
+    .tab-item {
+      flex: 1; text-align: center; font-size: 12px; color: var(--muted);
+      border: none; background: none; font-weight: 700; cursor: pointer;
+    }
+    .tab-item.active { color: var(--accent); }
+    .tab-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- 記録・タイマータブ -->
+  <div id="view-record">
+    <button class="btn-submit" id="saveBtn" onclick="submitData()">シート＆カレンダーに記録</button>
+
+    <!-- タイマー -->
+    <div class="timer-container">
+      <div class="timer-left">
+        <span class="timer-icon">⏱️</span>
+        <span class="timer-disp" id="timerDisplay">01:00</span>
+      </div>
+      <div class="timer-btns">
+        <button onclick="startTimer(60)">60秒</button>
+        <button onclick="startTimer(90)">90秒</button>
+        <button class="btn-play-pause" id="btnPlayPause" onclick="toggleTimer()">▶||</button>
+      </div>
+    </div>
+
+    <!-- 筋トレ用テーブル（10セット横スクロール） -->
+    <div class="table-scroll-wrap" id="strengthTableWrap">
+      <table class="table-workout">
+        <thead>
+          <tr>
+            <th class="sticky-col">セット</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+            <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="sticky-col">重量</td>
+            <td><input type="number" step="0.1" id="w-1" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-2" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-3" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-4" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-5" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-6" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-7" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-8" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-9" placeholder="kg" oninput="saveDraft()"></td>
+            <td><input type="number" step="0.1" id="w-10" placeholder="kg" oninput="saveDraft()"></td>
+          </tr>
+          <tr>
+            <td class="sticky-col">回数</td>
+            <td><input type="number" id="r-1" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-2" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-3" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-4" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-5" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-6" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-7" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-8" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-9" placeholder="回" oninput="saveDraft()"></td>
+            <td><input type="number" id="r-10" placeholder="回" oninput="saveDraft()"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 有酸素運動用テーブル（時間・距離・カロリー） -->
+    <table class="table-cardio hidden" id="cardioTableWrap">
+      <thead>
+        <tr>
+          <th>時間 (分)</th>
+          <th>距離 (km)</th>
+          <th>カロリー (kcal)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="number" step="1" id="c-time" placeholder="分" oninput="saveDraft()"></td>
+          <td><input type="number" step="0.1" id="c-dist" placeholder="km" oninput="saveDraft()"></td>
+          <td><input type="number" step="1" id="c-cal" placeholder="kcal" oninput="saveDraft()"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- メモ入力 -->
+    <input type="text" class="input-memo" id="memoInput" placeholder="メモ：その時の気づきなど" oninput="saveDraft()">
+
+    <!-- 部位フィルター -->
+    <h3 class="section-title">部位で絞り込み</h3>
+    <div class="cat-grid" id="catTabs">
+      <button class="cat-btn active" onclick="setCat('すべて')">すべて</button>
+      <button class="cat-btn" onclick="setCat('脚')">脚</button>
+      <button class="cat-btn" onclick="setCat('背中')">背中</button>
+      <button class="cat-btn" onclick="setCat('胸')">胸</button>
+      <button class="cat-btn" onclick="setCat('腕')">腕</button>
+      <button class="cat-btn" onclick="setCat('腹')">腹</button>
+      <button class="cat-btn" onclick="setCat('有酸素')">有酸素</button>
+      <button class="cat-btn" onclick="setCat('通勤徒歩')">通勤徒歩</button>
+    </div>
+
+    <!-- 種目選択 -->
+    <h3 class="section-title">種目を選択</h3>
+    <select class="select-exercise" id="exerciseSelect" onchange="onExerciseChange()"></select>
+    <input type="text" class="input-custom" id="customExercise" oninput="onCustomInput()" placeholder="自由入力（新しい種目はここに入力）">
+
+    <div class="add-menu-box" id="addMenuBox">
+      <label class="check-row">
+        <input type="checkbox" id="saveToMenuCheck" checked>
+        <span>次回から定番リストにも追加する</span>
+      </label>
+      <div class="cat-select-inline">
+        <span>登録する部位：</span>
+        <select id="newMenuCat" onchange="updateTableMode()">
+          <option value="胸">胸</option>
+          <option value="背中">背中</option>
+          <option value="脚">脚</option>
+          <option value="腕">腕</option>
+          <option value="腹">腹</option>
+          <option value="有酸素">有酸素</option>
+          <option value="通勤徒歩">通勤徒歩</option>
+        </select>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- 過去3回分の記録 -->
+    <h3 class="section-title">過去3回分の記録</h3>
+    <div id="recentHistoryList">読み込み中...</div>
+  </div>
+
+  <!-- 推移グラフ・履歴タブ -->
+  <div id="view-graph" class="hidden">
+    <div class="card-box">
+      <h3 class="section-title">グラフ表示する種目</h3>
+      <select class="select-exercise" id="graphSelect" onchange="renderChart()"></select>
+      <canvas id="myChart" height="220"></canvas>
+    </div>
+    <div class="card-box">
+      <h3 class="section-title">直近の記録履歴（削除もできます）</h3>
+      <div id="fullHistoryList" style="font-size:14px; line-height:1.5;">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 下部フッタータブバー -->
+  <div class="tab-bar">
+    <button class="tab-item active" id="tab-record" onclick="switchTab('record')">
+      <span class="tab-icon">✍️</span>記録・タイマー
+    </button>
+    <button class="tab-item" id="tab-graph" onclick="switchTab('graph')">
+      <span class="tab-icon">📈</span>推移グラフ・履歴
+    </button>
+  </div>
+
+<script>
+  // ★ここにGASで発行したウェブアプリのURLを貼り付けてください★
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZPS7yH82qHLqIVWg9MWXxa8ScPpbngb-Cw5wafd1VFw2ziTtdyZ7d03reObQ46C5j4Q/exec';
+
+  const MAX_SETS = 10;
+
+  const defaultMenus = [
+    { cat: '胸', name: 'チェストプレス' },
+    { cat: '胸', name: 'チェストプレス（シェイプパンプ）' },
+    { cat: '胸', name: '壁プッシュアップ' },
+    { cat: '腕', name: '上腕三頭筋トライセプス（シェイプパンプ）' },
+    { cat: '背中', name: 'ラットプルダウン' },
+    { cat: '背中', name: 'ローデルドロイド（ローイング）' },
+    { cat: '背中', name: '背中（シェイプパンプ）' },
+    { cat: '背中', name: 'バックエクステンション' },
+    { cat: '脚', name: '脚（シェイプパンプ）' },
+    { cat: '脚', name: 'ケーブルキックバック' },
+    { cat: '脚', name: 'ブルガリアンスクワット' },
+    { cat: '脚', name: 'レッグプレス' },
+    { cat: '脚', name: 'ヒップアブダクション' },
+    { cat: '脚', name: 'ケトルベルスイング' },
+    { cat: '脚', name: 'スクワット' },
+    { cat: '腹', name: '腹筋（シェイプパンプ）' },
+    { cat: '腹', name: 'アブドミナルクランチ' },
+    { cat: '腹', name: 'トーソローテーション' },
+    { cat: '腹', name: 'アブローラー' },
+    { cat: '腹', name: 'プランク（秒）' },
+    { cat: '有酸素', name: 'AMT', isCardio: true },
+    { cat: '有酸素', name: 'ZUMBA', isCardio: true },
+    { cat: '有酸素', name: 'トレッドミル', isCardio: true },
+    { cat: '有酸素', name: 'ウォーキング', isCardio: true },
+    { cat: '通勤徒歩', name: '通勤徒歩（行き）', isCardio: true },
+    { cat: '通勤徒歩', name: '通勤徒歩（帰り）', isCardio: true }
+  ];
+
+  const DRAFT_KEY = 'workout_draft_gh_v1';
+  const TIMER_KEY = 'workout_timer_end_gh_v1';
+
+  let menus = [...defaultMenus];
+  let currentCat = 'すべて';
+  let filteredMenus = [];
+  let allHistory = [];
+  let recentGroupedHistory = [];
+  let chartInstance = null;
+
+  let timerId = null;
+  let timerEndTime = null;
+  let timerPausedLeft = null;
+  let isTimerRunning = false;
+  let wakeLock = null;
+
+  async function postToGas(payload) {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  }
+
+  function isCardioMode() {
+    const custom = document.getElementById('customExercise').value.trim();
+    if (custom.length > 0) {
+      const cat = document.getElementById('newMenuCat').value;
+      return cat === '有酸素' || cat === '通勤徒歩';
+    }
+    const idx = Number(document.getElementById('exerciseSelect').value);
+    const item = filteredMenus[idx];
+    if (item) {
+      return Boolean(item.isCardio) || item.cat === '有酸素' || item.cat === '通勤徒歩';
+    }
+    return currentCat === '有酸素' || currentCat === '通勤徒歩';
+  }
+
+  function updateTableMode() {
+    const cardio = isCardioMode();
+    document.getElementById('strengthTableWrap').classList.toggle('hidden', cardio);
+    document.getElementById('cardioTableWrap').classList.toggle('hidden', !cardio);
+  }
+
+  function clearAllInputs() {
+    for (let i = 1; i <= MAX_SETS; i++) {
+      document.getElementById(`w-${i}`).value = '';
+      document.getElementById(`r-${i}`).value = '';
+    }
+    document.getElementById('c-time').value = '';
+    document.getElementById('c-dist').value = '';
+    document.getElementById('c-cal').value = '';
+    document.getElementById('strengthTableWrap').scrollLeft = 0;
+  }
+
+  function saveDraft() {
+    try {
+      const idx = Number(document.getElementById('exerciseSelect').value);
+      const item = filteredMenus[idx];
+      const weights = [];
+      const reps = [];
+      for (let i = 1; i <= MAX_SETS; i++) {
+        weights.push(document.getElementById(`w-${i}`).value);
+        reps.push(document.getElementById(`r-${i}`).value);
+      }
+      const draft = {
+        cat: currentCat,
+        exName: item ? item.name : '',
+        custom: document.getElementById('customExercise').value,
+        memo: document.getElementById('memoInput').value,
+        weights,
+        reps,
+        cTime: document.getElementById('c-time').value,
+        cDist: document.getElementById('c-dist').value,
+        cCal: document.getElementById('c-cal').value
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch (e) {}
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) {
+        renderExerciseOptions();
+        return;
+      }
+      const d = JSON.parse(raw);
+      currentCat = d.cat || 'すべて';
+      document.querySelectorAll('.cat-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent === currentCat);
+      });
+
+      renderExerciseOptions(true);
+
+      if (d.exName) {
+        const foundIdx = filteredMenus.findIndex(m => m.name === d.exName);
+        if (foundIdx >= 0) {
+          document.getElementById('exerciseSelect').value = String(foundIdx);
+        }
+      }
+
+      for (let i = 1; i <= MAX_SETS; i++) {
+        document.getElementById(`w-${i}`).value = d.weights && d.weights[i - 1] !== undefined ? d.weights[i - 1] : '';
+        document.getElementById(`r-${i}`).value = d.reps && d.reps[i - 1] !== undefined ? d.reps[i - 1] : '';
+      }
+      document.getElementById('c-time').value = d.cTime || '';
+      document.getElementById('c-dist').value = d.cDist || '';
+      document.getElementById('c-cal').value = d.cCal || '';
+
+      if (d.custom) {
+        document.getElementById('customExercise').value = d.custom;
+        onCustomInput(true);
+      }
+      if (d.memo) {
+        document.getElementById('memoInput').value = d.memo;
+      }
+      updateTableMode();
+    } catch (e) {
+      renderExerciseOptions();
+    }
+  }
+
+  function setCat(cat) {
+    currentCat = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent === cat);
+    });
+    if (cat !== 'すべて') {
+      document.getElementById('newMenuCat').value = cat;
+    }
+    renderExerciseOptions();
+    saveDraft();
+  }
+
+  function renderExerciseOptions(skipReset) {
+    filteredMenus = (currentCat === 'すべて')
+      ? menus
+      : menus.filter(m => m.cat === currentCat);
+
+    const sel = document.getElementById('exerciseSelect');
+    if (filteredMenus.length === 0) {
+      sel.innerHTML = '<option value="-1">該当種目なし（下の自由入力を使用）</option>';
+    } else {
+      sel.innerHTML = filteredMenus.map((m, i) =>
+        `<option value="${i}">${currentCat === 'すべて' ? `【${m.cat}】` : ''}${m.name}</option>`
+      ).join('');
+    }
+    if (!skipReset) {
+      onExerciseChange();
+    }
+  }
+
+  function onExerciseChange() {
+    updateTableMode();
+    clearAllInputs();
+    renderRecentHistory();
+    saveDraft();
+  }
+
+  function onCustomInput(skipSave) {
+    const val = document.getElementById('customExercise').value.trim();
+    const box = document.getElementById('addMenuBox');
+    if (val.length > 0) {
+      box.classList.add('show');
+      if (currentCat !== 'すべて') {
+        document.getElementById('newMenuCat').value = currentCat;
+      }
+    } else {
+      box.classList.remove('show');
+    }
+    updateTableMode();
+    if (!skipSave) saveDraft();
+  }
+
+  async function requestWakeLock() {
+    try {
+      if ('wakeLock' in navigator && !wakeLock) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      }
+    } catch (e) {}
+  }
+  function releaseWakeLock() {
+    try {
+      if (wakeLock) { wakeLock.release(); wakeLock = null; }
+    } catch (e) {}
+  }
+
+  function startTimer(sec) {
+    timerEndTime = Date.now() + sec * 1000;
+    timerPausedLeft = null;
+    isTimerRunning = true;
+    try { localStorage.setItem(TIMER_KEY, String(timerEndTime)); } catch (e) {}
+    requestWakeLock();
+    runTimerLoop();
+  }
+
+  function toggleTimer() {
+    if (isTimerRunning) {
+      clearInterval(timerId);
+      timerPausedLeft = Math.max(0, timerEndTime - Date.now());
+      timerEndTime = null;
+      isTimerRunning = false;
+      try { localStorage.removeItem(TIMER_KEY); } catch (e) {}
+      releaseWakeLock();
+      document.getElementById('btnPlayPause').textContent = '▶';
+    } else {
+      const resumeMs = (timerPausedLeft && timerPausedLeft > 0) ? timerPausedLeft : 60 * 1000;
+      timerEndTime = Date.now() + resumeMs;
+      timerPausedLeft = null;
+      isTimerRunning = true;
+      try { localStorage.setItem(TIMER_KEY, String(timerEndTime)); } catch (e) {}
+      requestWakeLock();
+      runTimerLoop();
+    }
+  }
+
+  function runTimerLoop() {
+    clearInterval(timerId);
+    document.getElementById('btnPlayPause').textContent = '||';
+    tickTimer();
+    timerId = setInterval(tickTimer, 250);
+  }
+
+  function tickTimer() {
+    if (!timerEndTime) return;
+    const diffMs = timerEndTime - Date.now();
+    if (diffMs <= 0) {
+      clearInterval(timerId);
+      timerEndTime = null;
+      timerPausedLeft = null;
+      isTimerRunning = false;
+      try { localStorage.removeItem(TIMER_KEY); } catch (e) {}
+      releaseWakeLock();
+      document.getElementById('timerDisplay').textContent = '00:00';
+      document.getElementById('btnPlayPause').textContent = '▶||';
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      return;
+    }
+    const secLeft = Math.ceil(diffMs / 1000);
+    const m = String(Math.floor(secLeft / 60)).padStart(2, '0');
+    const s = String(secLeft % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  }
+
+  function restoreTimer() {
+    try {
+      const savedEnd = Number(localStorage.getItem(TIMER_KEY));
+      if (savedEnd && savedEnd > Date.now()) {
+        timerEndTime = savedEnd;
+        isTimerRunning = true;
+        runTimerLoop();
+      }
+    } catch (e) {}
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && timerEndTime) {
+      tickTimer();
+      requestWakeLock();
+    }
+  });
+
+  // データ送信
+  async function submitData() {
+    const btn = document.getElementById('saveBtn');
+    const custom = document.getElementById('customExercise').value.trim();
+    const idx = Number(document.getElementById('exerciseSelect').value);
+    const item = filteredMenus[idx];
+    const exName = custom || (item ? item.name : '');
+
+    if (!exName) {
+      alert('種目を選択するか、自由入力欄に入力してください。');
+      return;
+    }
+
+    const cardio = isCardioMode();
+    const memo = document.getElementById('memoInput').value.trim();
+    const shouldAddMenu = custom.length > 0 && document.getElementById('saveToMenuCheck').checked;
+    const newCat = document.getElementById('newMenuCat').value;
+
+    let payload;
+    let newMenuItem = null;
+
+    if (cardio) {
+      const timeVal = Number(document.getElementById('c-time').value) || 0;
+      const distVal = Number(document.getElementById('c-dist').value) || 0;
+      const calVal = Number(document.getElementById('c-cal').value) || 0;
+      if (!timeVal && !distVal && !calVal) {
+        alert('時間・距離・カロリーのいずれかを入力してください。');
+        return;
+      }
+      const cardioMemo = [
+        distVal ? `${distVal}km` : '',
+        calVal ? `${calVal}kcal` : '',
+        memo
+      ].filter(Boolean).join(' / ');
+
+      payload = {
+        location: newCat === '通勤徒歩' ? '通勤' : 'ジム',
+        exercise: exName,
+        weight: distVal,
+        reps: timeVal,
+        sets: 1,
+        memo: cardioMemo,
+        isCardio: true,
+        time: timeVal,
+        distance: distVal,
+        calories: calVal
+      };
+
+      if (shouldAddMenu) {
+        newMenuItem = { location: 'ジム', cat: newCat, name: custom, isCardio: true };
+      }
+    } else {
+      const setsDetail = [];
+      for (let i = 1; i <= MAX_SETS; i++) {
+        const wStr = document.getElementById(`w-${i}`).value;
+        const rStr = document.getElementById(`r-${i}`).value;
+        if (wStr !== '' || rStr !== '') {
+          setsDetail.push({
+            set: i,
+            weight: Number(wStr) || 0,
+            reps: Number(rStr) || 0
+          });
+        }
+      }
+      if (setsDetail.length === 0) {
+        alert('1セット以上の重量または回数を入力してください。');
+        return;
+      }
+
+      const first = setsDetail[0];
+      const setSummary = setsDetail.map(s => `${s.weight}kg×${s.reps}`).join(', ');
+      const fullMemo = memo ? `${setSummary} (${memo})` : setSummary;
+
+      payload = {
+        location: 'ジム',
+        exercise: exName,
+        weight: first.weight,
+        reps: first.reps,
+        sets: setsDetail.length,
+        setsDetail: setsDetail,
+        memo: fullMemo
+      };
+
+      if (shouldAddMenu) {
+        newMenuItem = { location: 'ジム', cat: newCat, name: custom };
+      }
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ 保存中...';
+
+    try {
+      await postToGas({ action: 'saveWorkout', data: payload });
+
+      if (shouldAddMenu && newMenuItem) {
+        menus.push(newMenuItem);
+        await postToGas({ action: 'addCustomMenu', item: newMenuItem });
+        renderExerciseOptions(true);
+        const newIdx = filteredMenus.findIndex(m => m.name === custom);
+        if (newIdx >= 0) document.getElementById('exerciseSelect').value = String(newIdx);
+      }
+
+      clearAllInputs();
+      document.getElementById('memoInput').value = '';
+      document.getElementById('customExercise').value = '';
+      document.getElementById('addMenuBox').classList.remove('show');
+      saveDraft();
+      if (!cardio) startTimer(60);
+      await loadInitialData();
+    } catch (err) {
+      alert('保存エラー: ' + err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'シート＆カレンダーに記録';
+    }
+  }
+
+  // 初期データ（履歴＆追加メニュー）をGASから取得
+  async function loadInitialData() {
+    try {
+      const res = await fetch(`${GAS_URL}?action=init`);
+      const data = await res.json();
+
+      if (Array.isArray(data.customMenus)) {
+        data.customMenus.forEach(item => {
+          if (!menus.some(m => m.name === item.name)) {
+            menus.push({
+              cat: item.cat,
+              name: item.name,
+              isCardio: Boolean(item.isCardio) || item.cat === '有酸素' || item.cat === '通勤徒歩'
+            });
+          }
+        });
+        restoreDraft();
+      }
+
+      allHistory = Array.isArray(data.history) ? data.history : [];
+      renderRecentHistory();
+      if (!document.getElementById('view-graph').classList.contains('hidden')) {
+        renderGraphTab();
+      }
+    } catch (e) {
+      renderRecentHistory();
+    }
+  }
+
+  // 選択中種目の「過去3回分の記録」を表示
+  function renderRecentHistory() {
+    const listEl = document.getElementById('recentHistoryList');
+    const idx = Number(document.getElementById('exerciseSelect').value);
+    const item = filteredMenus[idx];
+    const targetName = item ? item.name : '';
+
+    const matched = allHistory.filter(d => d.exercise === targetName);
+    const recent3 = matched.slice(-3).reverse();
+    recentGroupedHistory = recent3;
+
+    if (!recent3.length) {
+      listEl.innerHTML = `<div style="font-size:13px; color:#64748b;">「${targetName}」の過去記録はまだありません。</div>`;
+      return;
+    }
+
+    listEl.innerHTML = recent3.map((d, index) => {
+      const dateStr = d.date ? d.date.slice(5) : '';
+      const parsedSets = parseHistorySets(d);
+
+      if (d.isCardio || isCardioMode()) {
+        const calMatch = d.memo ? d.memo.match(/(\d+)\s*kcal/) : null;
+        const calDisp = d.calories || (calMatch ? calMatch[1] : '-');
+        return `
+          <div class="history-card">
+            <div class="history-header">
+              <span class="history-date">${dateStr}</span>
+              <button class="btn-copy" onclick="copyHistoryToForm(${index})" title="この記録をコピー">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376A8.965 8.965 0 0 0 12 12.75 8.966 8.966 0 0 0 7.125 14.25m12 .375a9.06 9.06 0 0 1-1.5.124M12 16.5H6.75m0-12h9.75c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 18V5.625c0-.621.504-1.125 1.125-1.125z" />
+                </svg>
+              </button>
+            </div>
+            <table class="table-cardio" style="opacity:0.9;">
+              <thead><tr><th>時間 (分)</th><th>距離 (km)</th><th>カロリー (kcal)</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>${d.reps || '-'}</td>
+                  <td>${d.weight || '-'}</td>
+                  <td>${calDisp}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      const colsCount = Math.max(5, parsedSets.length);
+      let headHtml = '<th class="sticky-col">セット</th>';
+      let wHtml = '<td class="sticky-col">重量</td>';
+      let rHtml = '<td class="sticky-col">回数</td>';
+
+      for (let i = 0; i < colsCount; i++) {
+        const s = parsedSets[i];
+        headHtml += `<th>${i + 1}</th>`;
+        wHtml += `<td>${s ? `${s.weight}kg` : '-'}</td>`;
+        rHtml += `<td>${s ? `${s.reps}回` : '-'}</td>`;
+      }
+
+      return `
+        <div class="history-card">
+          <div class="history-header">
+            <span class="history-date">${dateStr}</span>
+            <button class="btn-copy" onclick="copyHistoryToForm(${index})" title="この記録をコピー">
+              <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376A8.965 8.965 0 0 0 12 12.75 8.966 8.966 0 0 0 7.125 14.25m12 .375a9.06 9.06 0 0 1-1.5.124M12 16.5H6.75m0-12h9.75c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 18V5.625c0-.621.504-1.125 1.125-1.125z" />
+              </svg>
+            </button>
+          </div>
+          <div class="table-scroll-wrap" style="opacity:0.9;">
+            <table class="table-workout">
+              <thead><tr>${headHtml}</tr></thead>
+              <tbody>
+                <tr>${wHtml}</tr>
+                <tr>${rHtml}</tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function parseHistorySets(d) {
+    if (Array.isArray(d.setsDetail) && d.setsDetail.length > 0) {
+      return d.setsDetail;
+    }
+    if (d.memo && d.memo.includes('kg×')) {
+      const matches = [...d.memo.matchAll(/([\d.]+)kg×(\d+)/g)];
+      if (matches.length > 0) {
+        return matches.map(m => ({ weight: Number(m[1]), reps: Number(m[2]) }));
+      }
+    }
+    const count = Math.min(MAX_SETS, Number(d.sets) || 1);
+    const arr = [];
+    for (let i = 0; i < count; i++) {
+      arr.push({ weight: d.weight, reps: d.reps });
+    }
+    return arr;
+  }
+
+  function copyHistoryToForm(index) {
+    const d = recentGroupedHistory[index];
+    if (!d) return;
+
+    if (isCardioMode()) {
+      const calMatch = d.memo ? d.memo.match(/(\d+)\s*kcal/) : null;
+      document.getElementById('c-time').value = d.reps || '';
+      document.getElementById('c-dist').value = d.weight || '';
+      document.getElementById('c-cal').value = d.calories || (calMatch ? calMatch[1] : '');
+    } else {
+      const sets = parseHistorySets(d);
+      for (let i = 1; i <= MAX_SETS; i++) {
+        const s = sets[i - 1];
+        document.getElementById(`w-${i}`).value = s ? s.weight : '';
+        document.getElementById(`r-${i}`).value = s ? s.reps : '';
+      }
+    }
+    saveDraft();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function switchTab(tab) {
+    document.getElementById('view-record').classList.toggle('hidden', tab !== 'record');
+    document.getElementById('view-graph').classList.toggle('hidden', tab !== 'graph');
+    document.getElementById('tab-record').classList.toggle('active', tab === 'record');
+    document.getElementById('tab-graph').classList.toggle('active', tab === 'graph');
+
+    if (tab === 'graph') {
+      renderGraphTab();
+    }
+  }
+
+  function renderGraphTab() {
+    const names = [...new Set(allHistory.map(d => d.exercise))];
+    const gSel = document.getElementById('graphSelect');
+    gSel.innerHTML = names.length
+      ? names.map(n => `<option value="${n}">${n}</option>`).join('')
+      : '<option>データなし</option>';
+    renderChart();
+    renderFullHistoryList();
+  }
+
+  function renderChart() {
+    const target = document.getElementById('graphSelect').value;
+    const filtered = allHistory.filter(d => d.exercise === target);
+    const ctx = document.getElementById('myChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: filtered.map(d => d.date ? d.date.slice(5, 10) : ''),
+        datasets: [{
+          label: `${target} 重量/距離`,
+          data: filtered.map(d => d.weight),
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, 0.12)',
+          tension: 0.25,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#475569' } } },
+        scales: {
+          x: { ticks: { color: '#475569' }, grid: { color: '#e2e8f0' } },
+          y: { beginAtZero: true, ticks: { color: '#475569' }, grid: { color: '#e2e8f0' } }
+        }
+      }
+    });
+  }
+
+  function renderFullHistoryList() {
+    const listEl = document.getElementById('fullHistoryList');
+    if (!allHistory.length) {
+      listEl.textContent = 'まだ記録がありません。';
+      return;
+    }
+    const recent = allHistory.slice(-15).reverse();
+    listEl.innerHTML = recent.map((d, idx) =>
+      `<div class="full-history-item">
+        <div>
+          <div style="font-size:12px; color:#64748b;">${d.date ? d.date.slice(5) : ''}</div>
+          <div style="margin-top:2px; font-weight:600;">${d.exercise}：<b>${d.weight}</b> × ${d.reps} (${d.sets}set)</div>
+        </div>
+        <button class="del-btn" id="del-${idx}" onclick="confirmDelete(${idx})">削除</button>
+      </div>`
+    ).join('');
+  }
+
+  async function confirmDelete(recentIdx) {
+    const recent = allHistory.slice(-15).reverse();
+    const target = recent[recentIdx];
+    if (!target) return;
+
+    if (!confirm(`「${target.exercise}」の記録を削除しますか？\n（※シートとカレンダーからも消えます）`)) {
+      return;
+    }
+
+    const btn = document.getElementById(`del-${recentIdx}`);
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '削除中...';
+    }
+
+    try {
+      await postToGas({ action: 'deleteWorkout', item: target });
+      await loadInitialData();
+    } catch (err) {
+      alert('削除エラー: ' + err);
+      await loadInitialData();
+    }
+  }
+
+  // 初期化
+  restoreDraft();
+  restoreTimer();
+  loadInitialData();
+</script>
+</body>
+</html>
